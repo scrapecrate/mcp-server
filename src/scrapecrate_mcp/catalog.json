@@ -1,0 +1,1110 @@
+{
+  "billing": {
+    "credit_value_usd": 0.001,
+    "free_monthly_credits": 100
+  },
+  "apis": [
+    {
+      "id": "youtube",
+      "name": "YouTube API",
+      "tagline": "Transcripts, metadata, comments, channels and search for any public YouTube video.",
+      "endpoints": [
+        {
+          "id": "transcript",
+          "path": "/v1/youtube/transcripts/{video_id}",
+          "summary": "Get a transcript",
+          "description": "The transcript of a video as timed segments and plain text. Without `lang` you get the video's default caption track.",
+          "list": false,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 1,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "video_id",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "11-character video ID"
+            },
+            {
+              "name": "lang",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Language code (e.g. `en`, `it`, `pt-BR`); auto-translated when the video doesn't have it"
+            },
+            {
+              "name": "format",
+              "in": "query",
+              "type": "enum",
+              "required": false,
+              "description": "`json` (segments + text), `text` or `srt`",
+              "values": [
+                "json",
+                "text",
+                "srt"
+              ],
+              "default": "json"
+            }
+          ]
+        },
+        {
+          "id": "transcript-languages",
+          "path": "/v1/youtube/transcripts/{video_id}/languages",
+          "summary": "List transcript languages",
+          "description": "The caption tracks available for a video, manual and auto-generated.",
+          "list": false,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 1,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "video_id",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "11-character video ID"
+            }
+          ]
+        },
+        {
+          "id": "video",
+          "path": "/v1/youtube/videos/{video_id}",
+          "summary": "Get video metadata",
+          "description": "Title, description, channel, duration, views, likes, comment count, tags and categories.",
+          "list": false,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 1,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "video_id",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "11-character video ID"
+            }
+          ]
+        },
+        {
+          "id": "video-chapters",
+          "path": "/v1/youtube/videos/{video_id}/chapters",
+          "summary": "Get video chapters",
+          "description": "The chapters of a video with start and end times in seconds.",
+          "list": false,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 1,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "video_id",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "11-character video ID"
+            }
+          ]
+        },
+        {
+          "id": "video-comments",
+          "path": "/v1/youtube/videos/{video_id}/comments",
+          "summary": "List video comments",
+          "description": "Top-level comments of a video with author, likes, replies count, date and pinned flag.",
+          "list": true,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "item",
+            "credits": 1,
+            "per": 100,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "video_id",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "11-character video ID"
+            },
+            {
+              "name": "sort",
+              "in": "query",
+              "type": "enum",
+              "required": false,
+              "description": "Top comments or newest first",
+              "values": [
+                "top",
+                "new"
+              ],
+              "default": "top"
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "Comments per page (max 100)",
+              "min": 1,
+              "max": 100,
+              "default": 50
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "`pagination.next_cursor` of the previous page"
+            }
+          ]
+        },
+        {
+          "id": "channel",
+          "path": "/v1/youtube/channels/{channel_id}",
+          "summary": "Get a channel",
+          "description": "Channel details by channel ID (`UC...`) or @handle.",
+          "list": false,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 1,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "channel_id",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "Channel ID (`UC...`) or @handle"
+            }
+          ]
+        },
+        {
+          "id": "channel-videos",
+          "path": "/v1/youtube/channels/{channel_id}/videos",
+          "summary": "List channel videos",
+          "description": "The videos of a channel, newest first, page by page.",
+          "list": true,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 1,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "channel_id",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "Channel ID (`UC...`) or @handle"
+            },
+            {
+              "name": "include_shorts",
+              "in": "query",
+              "type": "boolean",
+              "required": false,
+              "description": "Include Shorts",
+              "default": false
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "Videos per page (max 100)",
+              "min": 1,
+              "max": 100,
+              "default": 30
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "`pagination.next_cursor` of the previous page"
+            }
+          ]
+        },
+        {
+          "id": "search",
+          "path": "/v1/youtube/search",
+          "summary": "Search videos",
+          "description": "Search by keyword and get videos with channel, duration, views and upload date.",
+          "list": true,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 1,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "q",
+              "in": "query",
+              "type": "string",
+              "required": true,
+              "description": "Search query"
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "Results (max 50)",
+              "min": 1,
+              "max": 50,
+              "default": 20
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maps",
+      "name": "Google Maps API",
+      "tagline": "Search places, get full place details and every review, from any country.",
+      "endpoints": [
+        {
+          "id": "places-search",
+          "path": "/v1/maps/places/search",
+          "summary": "Search places",
+          "description": "Places matching a query, optionally around a point, up to 20 per call.",
+          "list": true,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 3,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "q",
+              "in": "query",
+              "type": "string",
+              "required": true,
+              "description": "What to search, e.g. `dentist in Berlin`"
+            },
+            {
+              "name": "language",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Result language (`en`, `it`, `pt-BR`...)",
+              "default": "en"
+            },
+            {
+              "name": "region",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Two-letter country code to bias results",
+              "default": "us"
+            },
+            {
+              "name": "lat",
+              "in": "query",
+              "type": "number",
+              "required": false,
+              "description": "Latitude of the search centre (with `lng`)",
+              "min": -90,
+              "max": 90
+            },
+            {
+              "name": "lng",
+              "in": "query",
+              "type": "number",
+              "required": false,
+              "description": "Longitude of the search centre (with `lat`)",
+              "min": -180,
+              "max": 180
+            },
+            {
+              "name": "radius_km",
+              "in": "query",
+              "type": "number",
+              "required": false,
+              "description": "Radius around `lat`/`lng` in km",
+              "min": 0.1,
+              "max": 100
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "Places per page (max 20)",
+              "min": 1,
+              "max": 20,
+              "default": 20
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "`pagination.next_cursor` of the previous page"
+            }
+          ]
+        },
+        {
+          "id": "place",
+          "path": "/v1/maps/places/{place_id}",
+          "summary": "Get place details",
+          "description": "Full details of a place by place ID, CID or feature ID.",
+          "list": false,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 3,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "place_id",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "Place ID, CID or feature ID (use `/places/resolve` for URLs)"
+            },
+            {
+              "name": "language",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Result language",
+              "default": "en"
+            },
+            {
+              "name": "region",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Two-letter country code",
+              "default": "us"
+            }
+          ]
+        },
+        {
+          "id": "place-reviews",
+          "path": "/v1/maps/places/{place_id}/reviews",
+          "summary": "List place reviews",
+          "description": "Reviews of a place with rating, text, translation, date and owner response.",
+          "list": true,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 3,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "place_id",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "Place ID, CID or feature ID"
+            },
+            {
+              "name": "sort",
+              "in": "query",
+              "type": "enum",
+              "required": false,
+              "description": "Review order",
+              "values": [
+                "relevant",
+                "newest",
+                "highest",
+                "lowest"
+              ],
+              "default": "relevant"
+            },
+            {
+              "name": "language",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Language of translations",
+              "default": "en"
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "Reviews per page (max 20, one page of the source)",
+              "min": 1,
+              "max": 20,
+              "default": 20
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "`pagination.next_cursor` of the previous page"
+            }
+          ]
+        },
+        {
+          "id": "places-resolve",
+          "path": "/v1/maps/places/resolve",
+          "summary": "Resolve a Maps URL or ID",
+          "description": "Turn any Google Maps URL, short link, CID or feature ID into the place IDs.",
+          "list": false,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 3,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "input",
+              "in": "query",
+              "type": "string",
+              "required": true,
+              "description": "A Maps URL, short link, CID or feature ID"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "trustpilot",
+      "name": "Trustpilot Reviews API",
+      "tagline": "Company profiles, trust scores and every public review, filterable by stars, language and date.",
+      "endpoints": [
+        {
+          "id": "companies-search",
+          "path": "/v1/trustpilot/companies/search",
+          "summary": "Search companies",
+          "description": "Companies matching a name or domain.",
+          "list": true,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 8,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "query",
+              "in": "query",
+              "type": "string",
+              "required": true,
+              "description": "Company name or domain"
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "Companies per page (max 10, one page of the source)",
+              "min": 1,
+              "max": 10,
+              "default": 10
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "`pagination.next_cursor` of the previous page"
+            }
+          ]
+        },
+        {
+          "id": "company",
+          "path": "/v1/trustpilot/companies/{domain}",
+          "summary": "Get a company",
+          "description": "Company profile with trust score, star distribution, languages and reply behaviour.",
+          "list": false,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 8,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "domain",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "Company domain, e.g. `booking.com`"
+            },
+            {
+              "name": "include_similar",
+              "in": "query",
+              "type": "boolean",
+              "required": false,
+              "description": "Include similar companies",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "company-reviews",
+          "path": "/v1/trustpilot/companies/{domain}/reviews",
+          "summary": "List company reviews",
+          "description": "Public reviews of a company with filters. `meta.complete` is false when the source caps the reviews reachable for a filter combination.",
+          "list": true,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 8,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "domain",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "Company domain"
+            },
+            {
+              "name": "stars",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Comma-separated star ratings"
+            },
+            {
+              "name": "language",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "`all` or an ISO 639-1 code",
+              "default": "all"
+            },
+            {
+              "name": "since",
+              "in": "query",
+              "type": "date",
+              "required": false,
+              "description": "Published on or after (YYYY-MM-DD)"
+            },
+            {
+              "name": "until",
+              "in": "query",
+              "type": "date",
+              "required": false,
+              "description": "Published on or before (YYYY-MM-DD)"
+            },
+            {
+              "name": "verified",
+              "in": "query",
+              "type": "boolean",
+              "required": false,
+              "description": "Only verified reviews",
+              "default": false
+            },
+            {
+              "name": "with_reply",
+              "in": "query",
+              "type": "boolean",
+              "required": false,
+              "description": "Only reviews with a company reply",
+              "default": false
+            },
+            {
+              "name": "search",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Full-text filter"
+            },
+            {
+              "name": "sort",
+              "in": "query",
+              "type": "enum",
+              "required": false,
+              "description": "Order",
+              "values": [
+                "recent",
+                "relevant"
+              ],
+              "default": "recent"
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "Reviews per page (max 20, one page of the source)",
+              "min": 1,
+              "max": 20,
+              "default": 20
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "`pagination.next_cursor` of the previous page"
+            }
+          ]
+        },
+        {
+          "id": "categories",
+          "path": "/v1/trustpilot/categories",
+          "summary": "List categories",
+          "description": "The category tree used to browse companies.",
+          "list": false,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 8,
+            "limit_param": null
+          },
+          "params": []
+        },
+        {
+          "id": "category-companies",
+          "path": "/v1/trustpilot/categories/{category_id}/companies",
+          "summary": "List companies in a category",
+          "description": "Companies of a category in a country, with optional trust score and city filters.",
+          "list": true,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 8,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "category_id",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "Category ID from `/categories`"
+            },
+            {
+              "name": "country",
+              "in": "query",
+              "type": "string",
+              "required": true,
+              "description": "Two-letter country code"
+            },
+            {
+              "name": "sort",
+              "in": "query",
+              "type": "enum",
+              "required": false,
+              "description": "Order",
+              "values": [
+                "relevant",
+                "reviews_count"
+              ],
+              "default": "relevant"
+            },
+            {
+              "name": "min_trust_score",
+              "in": "query",
+              "type": "enum",
+              "required": false,
+              "description": "Minimum trust score",
+              "values": [
+                "3.0",
+                "4.0",
+                "4.5"
+              ]
+            },
+            {
+              "name": "location",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "City, e.g. `Milano`"
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "Companies per page (max 20, one page of the source)",
+              "min": 1,
+              "max": 20,
+              "default": 20
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "`pagination.next_cursor` of the previous page"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ads",
+      "name": "Meta Ad Library API",
+      "tagline": "Search the ads running on Facebook and Instagram, with creatives, dates and advertiser.",
+      "endpoints": [
+        {
+          "id": "ads-search",
+          "path": "/v1/ads/search",
+          "summary": "Search ads",
+          "description": "Ads matching a keyword or an advertiser page, with filters, up to 30 per call. Every ad carries days_active (whole days from started_at to ended_at, or to today while it runs; null when unknown) and winning_score (0-100, null when days_active is null): long-running ads are the ones that pay off. score = L + V + R, with L = 70 x min(days_active, 90) / 90, V = 15 x min(variants_count - 1, 9) / 9 and R = 15 x min(log10(1 + EU reach) / 6, 1). The EU reach is only in the single-ad lookup, so in lists score = (L + V) x 100 / 85: a missing reach never lowers it. Rounded to the nearest integer. min_days_active and sort=longevity apply to the ads of the returned page, at the same price.",
+          "list": true,
+          "require_one_of": [
+            "q",
+            "page_id"
+          ],
+          "pricing": {
+            "unit": "call",
+            "credits": 5,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "q",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Keyword (required unless `page_id` is set)"
+            },
+            {
+              "name": "page_id",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Only ads of this advertiser page"
+            },
+            {
+              "name": "country",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Two-letter country code or `ALL`",
+              "default": "ALL"
+            },
+            {
+              "name": "status",
+              "in": "query",
+              "type": "enum",
+              "required": false,
+              "description": "Ad status",
+              "values": [
+                "active",
+                "inactive",
+                "all"
+              ],
+              "default": "active"
+            },
+            {
+              "name": "ad_type",
+              "in": "query",
+              "type": "enum",
+              "required": false,
+              "description": "All ads or political/issue ads",
+              "values": [
+                "all",
+                "political"
+              ],
+              "default": "all"
+            },
+            {
+              "name": "media_type",
+              "in": "query",
+              "type": "enum",
+              "required": false,
+              "description": "Creative type",
+              "values": [
+                "all",
+                "image",
+                "video",
+                "meme",
+                "none"
+              ],
+              "default": "all"
+            },
+            {
+              "name": "platforms",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Comma-separated: facebook, instagram, messenger, audience_network"
+            },
+            {
+              "name": "languages",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Comma-separated ISO 639-1 codes"
+            },
+            {
+              "name": "active_from",
+              "in": "query",
+              "type": "date",
+              "required": false,
+              "description": "Running on or after (YYYY-MM-DD)"
+            },
+            {
+              "name": "active_to",
+              "in": "query",
+              "type": "date",
+              "required": false,
+              "description": "Running on or before (YYYY-MM-DD)"
+            },
+            {
+              "name": "match",
+              "in": "query",
+              "type": "enum",
+              "required": false,
+              "description": "Keyword match",
+              "values": [
+                "any",
+                "exact"
+              ],
+              "default": "any"
+            },
+            {
+              "name": "sort",
+              "in": "query",
+              "type": "enum",
+              "required": false,
+              "description": "Order; `longevity` puts the longest-running ads of the page first",
+              "values": [
+                "relevance",
+                "impressions",
+                "longevity"
+              ],
+              "default": "relevance"
+            },
+            {
+              "name": "min_days_active",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "Keep only ads running for at least this many days (applied to the returned page, same price)",
+              "min": 0,
+              "max": 3650
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "Ads per page (max 30, one page of the source)",
+              "min": 1,
+              "max": 30,
+              "default": 30
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "`pagination.next_cursor` of the previous page"
+            }
+          ]
+        },
+        {
+          "id": "ad",
+          "path": "/v1/ads/{ad_id}",
+          "summary": "Get an ad",
+          "description": "One ad with creatives, payer and beneficiary, and EU/UK transparency data.",
+          "list": false,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 5,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "ad_id",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "Ad Library ID"
+            },
+            {
+              "name": "country",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Country used to look the ad up",
+              "default": "ALL"
+            }
+          ]
+        },
+        {
+          "id": "pages-search",
+          "path": "/v1/ads/pages/search",
+          "summary": "Search advertisers",
+          "description": "Advertiser pages whose ads match a keyword.",
+          "list": true,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 5,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "q",
+              "in": "query",
+              "type": "string",
+              "required": true,
+              "description": "Keyword"
+            },
+            {
+              "name": "country",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Two-letter country code or `ALL`",
+              "default": "ALL"
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "Pages (max 10, one page of the source)",
+              "min": 1,
+              "max": 10,
+              "default": 10
+            }
+          ]
+        },
+        {
+          "id": "page",
+          "path": "/v1/ads/pages/{page_id}",
+          "summary": "Get an advertiser",
+          "description": "Advertiser page details with Instagram account and active ads estimate.",
+          "list": false,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 5,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "page_id",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "Advertiser page ID"
+            }
+          ]
+        },
+        {
+          "id": "page-ads",
+          "path": "/v1/ads/pages/{page_id}/ads",
+          "summary": "List an advertiser's ads",
+          "description": "The ads of one advertiser page, with the same filters as search, including days_active and winning_score on every ad (see Search ads for the formula), min_days_active and sort=longevity.",
+          "list": true,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 5,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "page_id",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "Advertiser page ID"
+            },
+            {
+              "name": "country",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Two-letter country code or `ALL`",
+              "default": "ALL"
+            },
+            {
+              "name": "status",
+              "in": "query",
+              "type": "enum",
+              "required": false,
+              "description": "Ad status",
+              "values": [
+                "active",
+                "inactive",
+                "all"
+              ],
+              "default": "active"
+            },
+            {
+              "name": "media_type",
+              "in": "query",
+              "type": "enum",
+              "required": false,
+              "description": "Creative type",
+              "values": [
+                "all",
+                "image",
+                "video",
+                "meme",
+                "none"
+              ],
+              "default": "all"
+            },
+            {
+              "name": "sort",
+              "in": "query",
+              "type": "enum",
+              "required": false,
+              "description": "Order; `longevity` puts the longest-running ads of the page first",
+              "values": [
+                "relevance",
+                "longevity"
+              ],
+              "default": "relevance"
+            },
+            {
+              "name": "min_days_active",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "Keep only ads running for at least this many days (applied to the returned page, same price)",
+              "min": 0,
+              "max": 3650
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "Ads per page (max 30, one page of the source)",
+              "min": 1,
+              "max": 30,
+              "default": 30
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "`pagination.next_cursor` of the previous page"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.scrapecrate/scrapecrate",
+  "title": "ScrapeCrate",
+  "description": "YouTube, Google Maps, Trustpilot and Meta Ad Library data as tools, paid with one credit balance.",
+  "version": "1.0.0",
+  "websiteUrl": "https://scrapecrate.com/docs/mcp",
+  "icons": [
+    {
+      "src": "https://scrapecrate.com/icon.svg",
+      "mimeType": "image/svg+xml"
+    }
+  ],
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "scrapecrate-mcp",
+      "version": "1.0.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "SCRAPECRATE_API_KEY",
+          "description": "Your ScrapeCrate API key, from https://scrapecrate.com/dashboard/api-keys",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://api.scrapecrate.com/mcp"
+    }
+  ]
+}
