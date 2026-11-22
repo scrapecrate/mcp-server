@@ -880,7 +880,7 @@
               "in": "query",
               "type": "enum",
               "required": false,
-              "description": "Order; `longevity` puts the longest-running ads of the page first",
+              "description": "Order. `longevity` puts the longest-running ads of the page first.",
               "values": [
                 "relevance",
                 "impressions",
@@ -1012,7 +1012,7 @@
           "id": "page-ads",
           "path": "/v1/ads/pages/{page_id}/ads",
           "summary": "List an advertiser's ads",
-          "description": "The ads of one advertiser page, with the same filters as search, including days_active and winning_score on every ad (see Search ads for the formula), min_days_active and sort=longevity.",
+          "description": "The ads of one advertiser page, with the same filters as search. Every ad carries days_active and winning_score (see Search ads for the formula); min_days_active and sort=longevity work as in search.",
           "list": true,
           "require_one_of": null,
           "pricing": {
@@ -1069,7 +1069,7 @@
               "in": "query",
               "type": "enum",
               "required": false,
-              "description": "Order; `longevity` puts the longest-running ads of the page first",
+              "description": "Order. `longevity` puts the longest-running ads of the page first.",
               "values": [
                 "relevance",
                 "longevity"

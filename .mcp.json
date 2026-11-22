@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "scrapecrate": {
+      "command": "uvx",
+      "args": ["scrapecrate-mcp"],
+      "env": {
+        "SCRAPECRATE_API_KEY": "${SCRAPECRATE_API_KEY}"
+      }
+    }
+  }
+}
