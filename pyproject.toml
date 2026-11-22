@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "scrapecrate-mcp"
 version = "1.0.0"
-description = "MCP server for ScrapeCrate: YouTube, Google Maps, Trustpilot and Meta Ad Library data as tools for AI assistants"
+description = "MCP server for ScrapeCrate: YouTube, Google Maps, reviews (Trustpilot, App Store, Google Play) and Meta Ad Library data as tools for AI assistants"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"

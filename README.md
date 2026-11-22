@@ -4,7 +4,8 @@
 
 Gives Claude, Cursor, Windsurf and any MCP client every ScrapeCrate endpoint as a tool:
 YouTube (transcripts, metadata, comments, channels, search), Google Maps (places, details,
-reviews), Trustpilot (companies, reviews) and the Meta Ad Library (ads, advertisers).
+reviews), Trustpilot (companies, reviews), App Store and Google Play (apps, reviews) and the Meta
+Ad Library (ads, advertisers).
 One tool per endpoint, built from the live catalog, plus `account_balance`.
 
 ## Hosted server (no install, no key)

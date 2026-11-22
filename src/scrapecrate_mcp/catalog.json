@@ -7,13 +7,13 @@
     {
       "id": "youtube",
       "name": "YouTube API",
-      "tagline": "Transcripts, metadata, comments, channels and search for any public YouTube video.",
+      "tagline": "Transcripts, metadata, comments, channels, playlists and search for any public YouTube video.",
       "endpoints": [
         {
           "id": "transcript",
           "path": "/v1/youtube/transcripts/{video_id}",
           "summary": "Get a transcript",
-          "description": "The transcript of a video as timed segments and plain text. Without `lang` you get the video's default caption track.",
+          "description": "The transcript of a video as timed segments and plain text. Without `lang` you get the video's default caption track. format=vtt puts a WebVTT subtitle file in `text`; format=chunks returns `chunks` (index, text, start, end in seconds) with the chunk_size and chunk_overlap used: whole segments merged into pieces of about chunk_size characters, ready for embeddings.",
           "list": false,
           "require_one_of": null,
           "pricing": {
@@ -41,13 +41,35 @@
               "in": "query",
               "type": "enum",
               "required": false,
-              "description": "`json` (segments + text), `text` or `srt`",
+              "description": "`json` (segments + text), `text` or `srt`. `vtt` (WebVTT subtitles in `text`) or `chunks` (timestamped chunks for embeddings, in `chunks`).",
               "values": [
                 "json",
                 "text",
-                "srt"
+                "srt",
+                "vtt",
+                "chunks"
               ],
               "default": "json"
+            },
+            {
+              "name": "chunk_size",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "`format=chunks` only: target characters per chunk (segments are never split)",
+              "min": 200,
+              "max": 4000,
+              "default": 1000
+            },
+            {
+              "name": "chunk_overlap",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "`format=chunks` only: characters of whole segments repeated from the end of the previous chunk (less than `chunk_size`)",
+              "min": 0,
+              "max": 1000,
+              "default": 0
             }
           ]
         },
@@ -121,14 +143,18 @@
           "id": "video-comments",
           "path": "/v1/youtube/videos/{video_id}/comments",
           "summary": "List video comments",
-          "description": "Top-level comments of a video with author, likes, replies count, date and pinned flag.",
+          "description": "Top-level comments of a video with author, likes, replies count, date and pinned flag. With include_replies=true each comment also carries `replies` (comment_id, parent_id, text, author, like_count, published_at), up to replies_per_comment each. Replies are billed like comments: 1 credit per 100 comments and replies together.",
           "list": true,
           "require_one_of": null,
           "pricing": {
             "unit": "item",
             "credits": 1,
             "per": 100,
-            "limit_param": null
+            "limit_param": null,
+            "nested": {
+              "when": "include_replies",
+              "max_param": "replies_per_comment"
+            }
           },
           "params": [
             {
@@ -159,6 +185,24 @@
               "min": 1,
               "max": 100,
               "default": 50
+            },
+            {
+              "name": "include_replies",
+              "in": "query",
+              "type": "boolean",
+              "required": false,
+              "description": "Also return each comment's replies, in its `replies` list (billed like comments)",
+              "default": false
+            },
+            {
+              "name": "replies_per_comment",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "With `include_replies`: most replies per comment (max 100)",
+              "min": 1,
+              "max": 100,
+              "default": 10
             },
             {
               "name": "cursor",
@@ -195,7 +239,7 @@
           "id": "channel-videos",
           "path": "/v1/youtube/channels/{channel_id}/videos",
           "summary": "List channel videos",
-          "description": "The videos of a channel, newest first, page by page.",
+          "description": "The videos of a channel, newest first, page by page: follow `pagination.next_cursor`; every page costs the same, the last one like the first.",
           "list": true,
           "require_one_of": null,
           "pricing": {
@@ -218,6 +262,45 @@
               "required": false,
               "description": "Include Shorts",
               "default": false
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "Videos per page (max 100)",
+              "min": 1,
+              "max": 100,
+              "default": 30
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "`pagination.next_cursor` of the previous page"
+            }
+          ]
+        },
+        {
+          "id": "playlist-videos",
+          "path": "/v1/youtube/playlists/{playlist_id}/videos",
+          "summary": "List playlist videos",
+          "description": "The videos of a public playlist in playlist order, page by page: follow `pagination.next_cursor`; every page costs the same, the last one like the first. `meta.total_videos` and `meta.total_pages` give the size of the playlist (null when YouTube does not show it). Private and Mix playlists answer 404.",
+          "list": true,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 1,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "playlist_id",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "Playlist ID: the `list=` value of a playlist URL (`PL...`, `UU...`, `OLAK5uy_...`)"
             },
             {
               "name": "limit",
@@ -740,6 +823,617 @@
               "min": 1,
               "max": 20,
               "default": 20
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "`pagination.next_cursor` of the previous page"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reviews",
+      "name": "Reviews API",
+      "tagline": "Trustpilot, App Store and Google Play reviews in one JSON format, with filters and pagination.",
+      "endpoints": [
+        {
+          "id": "trustpilot-companies-search",
+          "path": "/v1/reviews/trustpilot/companies/search",
+          "summary": "Search Trustpilot companies",
+          "description": "Trustpilot companies matching a name or domain, as `Entity` objects (`type` business).",
+          "list": true,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 8,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "query",
+              "in": "query",
+              "type": "string",
+              "required": true,
+              "description": "Company name or domain"
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "Companies per page (max 10, one page of the source)",
+              "min": 1,
+              "max": 10,
+              "default": 10
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "`pagination.next_cursor` of the previous page"
+            }
+          ]
+        },
+        {
+          "id": "trustpilot-company",
+          "path": "/v1/reviews/trustpilot/companies/{domain}",
+          "summary": "Get a Trustpilot company",
+          "description": "A Trustpilot company as an `Entity`: rating, review count, rating distribution and categories; TrustScore, contacts, claim status and reply behaviour in `extra`.",
+          "list": false,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 8,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "domain",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "Company domain, e.g. `booking.com`"
+            },
+            {
+              "name": "include_similar",
+              "in": "query",
+              "type": "boolean",
+              "required": false,
+              "description": "Include similar companies in `extra.similar`",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "trustpilot-company-reviews",
+          "path": "/v1/reviews/trustpilot/companies/{domain}/reviews",
+          "summary": "List Trustpilot reviews",
+          "description": "Public reviews of a Trustpilot company as `Review` objects, with filters. `meta.entity` is the company reviewed; `meta.complete` is false when the source caps the reviews reachable for a filter combination. A page that returns nothing only because of the filters, with `has_more` true, is free.",
+          "list": true,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 8,
+            "free_empty_page": true,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "domain",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "Company domain"
+            },
+            {
+              "name": "stars",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Comma-separated star ratings"
+            },
+            {
+              "name": "language",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "`all` or an ISO 639-1 code",
+              "default": "all"
+            },
+            {
+              "name": "since",
+              "in": "query",
+              "type": "date",
+              "required": false,
+              "description": "Published on or after (YYYY-MM-DD)"
+            },
+            {
+              "name": "until",
+              "in": "query",
+              "type": "date",
+              "required": false,
+              "description": "Published on or before (YYYY-MM-DD)"
+            },
+            {
+              "name": "verified",
+              "in": "query",
+              "type": "boolean",
+              "required": false,
+              "description": "Only verified reviews",
+              "default": false
+            },
+            {
+              "name": "with_reply",
+              "in": "query",
+              "type": "boolean",
+              "required": false,
+              "description": "Only reviews with a company reply",
+              "default": false
+            },
+            {
+              "name": "search",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Full-text filter"
+            },
+            {
+              "name": "sort",
+              "in": "query",
+              "type": "enum",
+              "required": false,
+              "description": "Order",
+              "values": [
+                "recent",
+                "relevant"
+              ],
+              "default": "recent"
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "Reviews per page (max 20, one page of the source)",
+              "min": 1,
+              "max": 20,
+              "default": 20
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "`pagination.next_cursor` of the previous page"
+            }
+          ]
+        },
+        {
+          "id": "trustpilot-categories",
+          "path": "/v1/reviews/trustpilot/categories",
+          "summary": "List Trustpilot categories",
+          "description": "The Trustpilot category tree used to browse companies.",
+          "list": false,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 8,
+            "limit_param": null
+          },
+          "params": []
+        },
+        {
+          "id": "trustpilot-category-companies",
+          "path": "/v1/reviews/trustpilot/categories/{category_id}/companies",
+          "summary": "List Trustpilot companies in a category",
+          "description": "Companies of a Trustpilot category in a country, as `Entity` objects, with optional trust score and city filters. `meta.category` is the category ranked.",
+          "list": true,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 8,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "category_id",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "Category ID from `/trustpilot/categories`"
+            },
+            {
+              "name": "country",
+              "in": "query",
+              "type": "string",
+              "required": true,
+              "description": "Two-letter country code"
+            },
+            {
+              "name": "sort",
+              "in": "query",
+              "type": "enum",
+              "required": false,
+              "description": "Order",
+              "values": [
+                "relevant",
+                "reviews_count"
+              ],
+              "default": "relevant"
+            },
+            {
+              "name": "min_trust_score",
+              "in": "query",
+              "type": "enum",
+              "required": false,
+              "description": "Minimum trust score",
+              "values": [
+                "3.0",
+                "4.0",
+                "4.5"
+              ]
+            },
+            {
+              "name": "location",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "City, e.g. `Milano`"
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "Companies per page (max 20, one page of the source)",
+              "min": 1,
+              "max": 20,
+              "default": 20
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "`pagination.next_cursor` of the previous page"
+            }
+          ]
+        },
+        {
+          "id": "appstore-apps-search",
+          "path": "/v1/reviews/appstore/apps/search",
+          "summary": "Search App Store apps",
+          "description": "Apps of one country's App Store matching a name, developer or keyword, as `Entity` objects (`type` app).",
+          "list": true,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 8,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "query",
+              "in": "query",
+              "type": "string",
+              "required": true,
+              "description": "App name or keyword"
+            },
+            {
+              "name": "country",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Store country (ISO 3166-1 alpha-2): apps and reviews differ per country",
+              "default": "us"
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "Apps per page (max 20)",
+              "min": 1,
+              "max": 20,
+              "default": 10
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "`pagination.next_cursor` of the previous page"
+            }
+          ]
+        },
+        {
+          "id": "appstore-app",
+          "path": "/v1/reviews/appstore/apps/{app_id}",
+          "summary": "Get an App Store app",
+          "description": "An app of one country's App Store as an `Entity`: rating, rating count, genres and description; developer, price, version, release dates and age rating in `extra`.",
+          "list": false,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 8,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "app_id",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "App Store app ID (`324684580`, also `id324684580`) or bundle ID (`com.spotify.client`)"
+            },
+            {
+              "name": "country",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Store country (ISO 3166-1 alpha-2)",
+              "default": "us"
+            }
+          ]
+        },
+        {
+          "id": "appstore-app-reviews",
+          "path": "/v1/reviews/appstore/apps/{app_id}/reviews",
+          "summary": "List App Store reviews",
+          "description": "Reviews of an app in one country's App Store as `Review` objects, newest or most helpful first. Apple publishes the newest 500 reviews per country and sort: `meta.complete` is false when that cap cut the list. `meta.entity` is the app. A page that returns nothing only because of the filters, with `has_more` true, is free.",
+          "list": true,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 8,
+            "free_empty_page": true,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "app_id",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "App Store app ID or bundle ID"
+            },
+            {
+              "name": "country",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Store country (ISO 3166-1 alpha-2)",
+              "default": "us"
+            },
+            {
+              "name": "sort",
+              "in": "query",
+              "type": "enum",
+              "required": false,
+              "description": "Order",
+              "values": [
+                "recent",
+                "helpful"
+              ],
+              "default": "recent"
+            },
+            {
+              "name": "stars",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Comma-separated star ratings"
+            },
+            {
+              "name": "since",
+              "in": "query",
+              "type": "date",
+              "required": false,
+              "description": "Published on or after (YYYY-MM-DD)"
+            },
+            {
+              "name": "until",
+              "in": "query",
+              "type": "date",
+              "required": false,
+              "description": "Published on or before (YYYY-MM-DD)"
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "Reviews per page (max 50, one page of the source)",
+              "min": 1,
+              "max": 50,
+              "default": 50
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "`pagination.next_cursor` of the previous page"
+            }
+          ]
+        },
+        {
+          "id": "googleplay-apps-search",
+          "path": "/v1/reviews/googleplay/apps/search",
+          "summary": "Search Google Play apps",
+          "description": "Apps on Google Play matching a name or keyword, as `Entity` objects (`type` app).",
+          "list": true,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 8,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "query",
+              "in": "query",
+              "type": "string",
+              "required": true,
+              "description": "App name or keyword"
+            },
+            {
+              "name": "country",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Store country (ISO 3166-1 alpha-2)",
+              "default": "us"
+            },
+            {
+              "name": "language",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Language of the texts, ISO 639-1 (`en`, `pt-BR`)",
+              "default": "en"
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "Apps per page (max 20)",
+              "min": 1,
+              "max": 20,
+              "default": 10
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "`pagination.next_cursor` of the previous page"
+            }
+          ]
+        },
+        {
+          "id": "googleplay-app",
+          "path": "/v1/reviews/googleplay/apps/{app_id}",
+          "summary": "Get a Google Play app",
+          "description": "An app on Google Play as an `Entity`: rating, ratings count and distribution by star, category and description; developer, installs, price, content rating and last update in `extra`.",
+          "list": false,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 8,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "app_id",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "Package name, e.g. `com.spotify.music`"
+            },
+            {
+              "name": "country",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Store country (ISO 3166-1 alpha-2)",
+              "default": "us"
+            },
+            {
+              "name": "language",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Language of the texts, ISO 639-1",
+              "default": "en"
+            }
+          ]
+        },
+        {
+          "id": "googleplay-app-reviews",
+          "path": "/v1/reviews/googleplay/apps/{app_id}/reviews",
+          "summary": "List Google Play reviews",
+          "description": "Reviews of a Google Play app as `Review` objects, newest or most relevant first, with the developer's reply when there is one. `meta.entity` is the app. With several star ratings, the reviews of each come one after the other. A page that returns nothing only because of the filters, with `has_more` true, is free.",
+          "list": true,
+          "require_one_of": null,
+          "pricing": {
+            "unit": "call",
+            "credits": 8,
+            "free_empty_page": true,
+            "limit_param": null
+          },
+          "params": [
+            {
+              "name": "app_id",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "description": "Package name"
+            },
+            {
+              "name": "country",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Store country (ISO 3166-1 alpha-2)",
+              "default": "us"
+            },
+            {
+              "name": "language",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Language of the reviews, ISO 639-1",
+              "default": "en"
+            },
+            {
+              "name": "sort",
+              "in": "query",
+              "type": "enum",
+              "required": false,
+              "description": "Order",
+              "values": [
+                "recent",
+                "relevant"
+              ],
+              "default": "recent"
+            },
+            {
+              "name": "stars",
+              "in": "query",
+              "type": "string",
+              "required": false,
+              "description": "Comma-separated star ratings"
+            },
+            {
+              "name": "since",
+              "in": "query",
+              "type": "date",
+              "required": false,
+              "description": "Published on or after (YYYY-MM-DD)"
+            },
+            {
+              "name": "until",
+              "in": "query",
+              "type": "date",
+              "required": false,
+              "description": "Published on or before (YYYY-MM-DD)"
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "type": "integer",
+              "required": false,
+              "description": "Reviews per page (max 50, one page of the source)",
+              "min": 1,
+              "max": 50,
+              "default": 50
             },
             {
               "name": "cursor",

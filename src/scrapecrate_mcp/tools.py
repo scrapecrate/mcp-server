@@ -54,7 +54,14 @@ def _price(p: dict) -> str:
     unit = "credit" if c == 1 else "credits"
     if p["unit"] == "call":
         return f"{c} {unit} per call"
-    return f"{c} {unit} per {p.get('per', 1)} items returned (min {p.get('min') or c})"
+    text = f"{c} {unit} per {p.get('per', 1)} items returned (min {p.get('min') or c})"
+    nested = p.get("nested")
+    if nested:
+        text += (
+            f"; with {nested['when']}=true the nested items (up to {nested['max_param']} per"
+            " item) count as items too"
+        )
+    return text
 
 
 def _schema(param: dict) -> dict:

@@ -1,7 +1,7 @@
 {
   "name": "scrapecrate-mcp",
   "version": "1.0.0",
-  "description": "MCP server for ScrapeCrate: YouTube, Google Maps, Trustpilot and Meta Ad Library data as tools for AI assistants (npm wrapper around the Python package)",
+  "description": "MCP server for ScrapeCrate: YouTube, Google Maps, reviews (Trustpilot, App Store, Google Play) and Meta Ad Library data as tools for AI assistants (npm wrapper around the Python package)",
   "license": "MIT",
   "bin": {
     "scrapecrate-mcp": "./bin/cli.js"

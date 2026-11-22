@@ -33,7 +33,30 @@ def test_schemas():
     assert "each page is a new call" in tools["maps_places_search"].description
     assert "Price: 1 credit per 100 items returned (min 1)" in tools["youtube_video_comments"].description
     assert "Price: 8 credits per call" in tools["trustpilot_company"].description
-    assert tools["youtube_transcript"].input_schema["properties"]["format"]["enum"] == ["json", "text", "srt"]
+    # Test for master-scraper#9: vtt and chunks (local MCP: every feature listed)
+    assert tools["youtube_transcript"].input_schema["properties"]["format"]["enum"] == [
+        "json", "text", "srt", "vtt", "chunks"
+    ]
+    assert "include_replies" in tools["youtube_video_comments"].input_schema["properties"]
+    assert "youtube_playlist_videos" in tools
+
+
+def test_reviews_api_tools():
+    # Test for master-scraper#8: the Reviews API endpoints are tools, priced like Trustpilot,
+    # and say that an empty filtered page is free
+    tools = {t.name: t for t in build_tools(bundled_catalog())}
+    for name in (
+        "reviews_trustpilot_company_reviews",
+        "reviews_appstore_apps_search",
+        "reviews_appstore_app",
+        "reviews_appstore_app_reviews",
+        "reviews_googleplay_apps_search",
+        "reviews_googleplay_app",
+        "reviews_googleplay_app_reviews",
+    ):
+        assert "Price: 8 credits per call" in tools[name].description, name
+    assert "is free" in tools["reviews_appstore_app_reviews"].description
+    assert tools["reviews_googleplay_app_reviews"].input_schema["required"] == ["app_id"]
 
 
 def test_no_private_names():
