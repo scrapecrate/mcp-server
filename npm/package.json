@@ -1,0 +1,32 @@
+{
+  "name": "scrapecrate-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for ScrapeCrate: YouTube, Google Maps, Trustpilot and Meta Ad Library data as tools for AI assistants (npm wrapper around the Python package)",
+  "license": "MIT",
+  "bin": {
+    "scrapecrate-mcp": "./bin/cli.js"
+  },
+  "files": [
+    "bin/"
+  ],
+  "keywords": [
+    "mcp",
+    "scraping",
+    "youtube",
+    "google-maps",
+    "trustpilot",
+    "ad-library",
+    "ai"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scrapecrate/mcp-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/scrapecrate/mcp-server/issues"
+  },
+  "homepage": "https://scrapecrate.com/docs/mcp"
+}
