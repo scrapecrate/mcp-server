@@ -2,6 +2,8 @@
 
 <!-- mcp-name: com.scrapecrate/scrapecrate -->
 
+[![Listed on mcpservers.org](https://mcpservers.org/badge.svg)](https://mcpservers.org/servers/scrapecrate/mcp-server)
+
 Gives Claude, Cursor, Windsurf and any MCP client every ScrapeCrate endpoint as a tool:
 YouTube (transcripts, metadata, comments, channels, search), Google Maps (places, details,
 reviews), Trustpilot (companies, reviews), App Store and Google Play (apps, reviews) and the Meta
